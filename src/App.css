@@ -1,38 +1,174 @@
-.App {
+/* App.css */
+
+/* General App Styling */
+.app-container {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7fc;
+  color: #333;
+  padding: 20px;
+}
+
+h2 {
+  color: #2c3e50;
   text-align: center;
+  margin-bottom: 20px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Search Section Styling */
+.search-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 30px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.location-inputs {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.location-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 45%;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.location-input:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+.search-section h2 {
+  font-size: 24px;
+}
+
+/* Loading Section */
+.loading {
+  font-size: 18px;
+  text-align: center;
+  margin-top: 20px;
+  color: #3498db;
+}
+
+/* Bus Schedule List */
+.bus-schedule-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+}
+
+.bus-schedule-container ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.bus-schedule-container li {
+  background-color: #ffffff;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  font-size: 18px;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+}
+
+.bus-schedule-container li:hover {
+  background-color: #ecf0f1;
+  cursor: pointer;
+}
+
+button {
+  background-color: #3498db;
   color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.App-link {
-  color: #61dafb;
+button:hover {
+  background-color: #2980b9;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Available Buses */
+.available-buses {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.available-buses h3 {
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.available-buses ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.available-buses li {
+  background-color: #f9f9f9;
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.available-buses li:hover {
+  background-color: #ecf0f1;
+  cursor: pointer;
+}
+
+/* Booking Form */
+.booking-form {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.booking-form input,
+.booking-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.booking-form button {
+  background-color: #3498db;
+  color: white;
+  padding: 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.booking-form button:hover {
+  background-color: #2980b9;
 }
