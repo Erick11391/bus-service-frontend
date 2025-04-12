@@ -1,23 +1,38 @@
-// src/BusList.js
-import React from 'react';
-import DeleteButton from './DeleteButton';
+import React from "react";
+import "./BookingForm.css";
 
-function BusList({ schedules }) {
+const BusList = ({ buses, bookedBuses, onSelectBus, onConfirmBooking }) => {
   return (
-    <div>
-      <h2>Bus Schedules</h2>
+    <div className="bus-list">
+      <h2>Available Buses</h2>
       <ul>
-        {schedules.map(schedule => (
-          <li key={schedule.bus_id}>
-            <h3>{schedule.route}</h3>
-            <p>Start: {schedule.start}</p>
-            <p>End: {schedule.end}</p>
-            <DeleteButton busId={schedule.bus_id} />
-          </li>
-        ))}
+        {buses.map((bus) => {
+          const isBooked = bookedBuses.includes(bus.id);
+
+          return (
+            <li key={bus.id} className={`bus-item ${isBooked ? "booked" : ""}`}>
+              <div>
+                <strong>{bus.busNumber}</strong> - {bus.route}
+              </div>
+              <div>
+                Departure: {bus.departureTime} | Arrival: {bus.arrivalTime}
+              </div>
+              <div className="bus-actions">
+                {isBooked ? (
+                  <span className="booked-status">Booked</span>
+                ) : (
+                  <>
+                    <button onClick={() => onSelectBus(bus)}>Select Bus</button>
+                    <button onClick={() => onConfirmBooking(bus)}>Confirm Booking</button>
+                  </>
+                )}
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
-}
+};
 
 export default BusList;

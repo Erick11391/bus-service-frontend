@@ -21,6 +21,9 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location]);
 
+  // Check if the user is logged in
+  const token = localStorage.getItem("token");
+
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-container">
@@ -74,9 +77,22 @@ const Navbar = () => {
           </Link>
         </div>
 
-        <button className="login-btn">
-          Login
-        </button>
+        {/* Conditional Rendering for Login/Logout */}
+        {token ? (
+          <button
+            className="login-btn"
+            onClick={() => {
+              localStorage.removeItem("token"); // Clear token on logout
+              window.location.href = "/"; // Redirect to home page
+            }}
+          >
+            Logout
+          </button>
+        ) : (
+          <Link to="/login" className="login-btn">
+            Login
+          </Link>
+        )}
       </div>
     </nav>
   );
