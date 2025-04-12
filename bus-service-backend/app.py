@@ -5,7 +5,8 @@ import os
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
-from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate  # Import Migrate
+from models import db, Bus, Booking, User  # Import models and db from models.py
 
 # Load environment variables
 load_dotenv()
@@ -13,25 +14,15 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)  # Enable CORS
 
-# Mock Data
-buses = [
-    {"id": 1, "busNumber": "Bus 101", "route": "Downtown to Park", "departureTime": "08:00 AM", "arrivalTime": "09:00 AM"},
-    {"id": 2, "busNumber": "Bus 102", "route": "Airport to Central Station", "departureTime": "09:00 AM", "arrivalTime": "10:00 AM"},
-]
+# Configure SQLite database
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///bus_service.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Disable unnecessary warnings
 
-bookings = [
-    {"id": 1, "userId": 1, "busId": 1, "date": "2023-10-15"},
-    {"id": 2, "userId": 2, "busId": 2, "date": "2023-10-16"},
-]
+# Initialize database
+db.init_app(app)
 
-# Hash passwords for mock users
-hashed_password_user = bcrypt.hashpw("password123".encode("utf-8"), bcrypt.gensalt())
-hashed_password_admin = bcrypt.hashpw("admin123".encode("utf-8"), bcrypt.gensalt())
-
-users = [
-    {"id": 1, "email": "user@example.com", "password": hashed_password_user, "role": "user"},
-    {"id": 2, "email": "admin@example.com", "password": hashed_password_admin, "role": "admin"},
-]
+# Initialize Migrate
+migrate = Migrate(app, db)  # Initialize Flask-Migrate
 
 # Helper function to generate JWT token
 def generate_token(user_id, role):
@@ -45,15 +36,36 @@ def generate_token(user_id, role):
 # Routes
 @app.route("/api/buses", methods=["GET"])
 def get_buses():
-    return jsonify(buses)
+    buses = Bus.query.all()
+    return jsonify([bus.to_dict() for bus in buses])
 
 @app.route("/api/bookings", methods=["GET"])
 def get_bookings():
-    return jsonify(bookings)
+    bookings = Booking.query.all()
+    return jsonify([booking.to_dict() for booking in bookings])
+
+@app.route("/api/bookings", methods=["POST"])
+def create_booking():
+    data = request.get_json()
+    userId = data.get("userId")
+    busId = data.get("busId")
+    date = data.get("date")
+
+    # Validate input
+    if not userId or not busId or not date:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    # Create a new booking
+    new_booking = Booking(userId=userId, busId=busId, date=date)
+    db.session.add(new_booking)
+    db.session.commit()
+
+    return jsonify({"message": "Booking created successfully", "booking": new_booking.to_dict()}), 201
 
 @app.route("/api/users", methods=["GET"])
 def get_users():
-    return jsonify(users)
+    users = User.query.all()
+    return jsonify([user.to_dict() for user in users])
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -61,16 +73,16 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    user = next((u for u in users if u["email"] == email), None)
+    user = User.query.filter_by(email=email).first()
 
-    if not user or not bcrypt.checkpw(password.encode("utf-8"), user["password"]):
+    if not user or not bcrypt.checkpw(password.encode("utf-8"), user.password):
         return jsonify({"error": "Invalid email or password"}), 401
 
     # Generate JWT token
-    token = generate_token(user["id"], user["role"])
+    token = generate_token(user.id, user.role)
 
     # Return token and role
-    return jsonify({"token": token, "role": user["role"]})
+    return jsonify({"token": token, "role": user.role})
 
 # Run the app
 if __name__ == "__main__":
