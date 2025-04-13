@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Login.css"; // Import the CSS file
+import axios from "axios";
+
+import "./Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -8,32 +10,31 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Mock users with roles
-  const mockUsers = [
-    { email: "user@example.com", password: "password123", role: "user" },
-    { email: "admin@example.com", password: "admin123", role: "admin" },
-  ];
-
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // Find the user in the mock data
-    const user = mockUsers.find(
-      (u) => u.email === email && u.password === password
-    );
+    try {
+      // 👇 Changed from localhost to 127.0.0.1
+      const response = await axios.post("http://127.0.0.1:5000/api/login", {
+        email,
+        password,
+      });
 
-    if (user) {
-      // Save token and role in localStorage
-      localStorage.setItem("token", "mock-auth-token");
-      localStorage.setItem("role", user.role);
+      const { token, role } = response.data;
 
-      // Redirect based on role
-      if (user.role === "admin") {
-        navigate("/admin"); // Redirect admins to the admin panel
+      // Store token and role
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+
+      // Navigate based on role
+      if (role === "admin") {
+        navigate("/admin");
       } else {
-        navigate("/user-dashboard"); // Redirect regular users to their dashboard
+        navigate("/user-dashboard");
       }
-    } else {
+    } catch (err) {
+      console.error(err);
       setError("Invalid email or password");
     }
   };

@@ -18,6 +18,7 @@ import Login from "./Login";
 import AdminPanel from "./AdminPanel";
 import UserDashboard from "./UserDashboard";
 import "./App.css";
+import axios from "axios";
 
 function App() {
   const [schedules, setSchedules] = useState([]);
@@ -26,47 +27,21 @@ function App() {
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
 
-  // Dummy data for bus schedules
-  const dummySchedules = [
-    {
-      id: 1,
-      busNumber: "Bus 101",
-      departureTime: "08:00 AM",
-      arrivalTime: "09:00 AM",
-      route: "Downtown to Park",
-    },
-    {
-      id: 2,
-      busNumber: "Bus 102",
-      departureTime: "09:00 AM",
-      arrivalTime: "10:00 AM",
-      route: "Airport to Central Station",
-    },
-    {
-      id: 3,
-      busNumber: "Bus 103",
-      departureTime: "10:30 AM",
-      arrivalTime: "11:30 AM",
-      route: "Mall to City Center",
-    },
-    {
-      id: 4,
-      busNumber: "Bus 104",
-      departureTime: "12:00 PM",
-      arrivalTime: "01:00 PM",
-      route: "Uptown to Suburbs",
-    },
-  ];
-
+ 
+ 
   useEffect(() => {
-    const loadSchedules = () => {
-      setTimeout(() => {
-        setSchedules(dummySchedules);
-        setFilteredSchedules(dummySchedules);
+    const loadSchedules = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/buses");
+        setSchedules(response.data);
+        setFilteredSchedules(response.data);
+      } catch (error) {
+        console.error("Failed to fetch bus data:", error);
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
-
+  
     loadSchedules();
   }, []);
 

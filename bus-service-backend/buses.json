@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "name": "",
+    "source": "",
+    "destination": "",
+    "departure_time": "",
+    "arrival_time": ""
+  },
+  {
+    "id": 2,
+    "name": "garnieth",
+    "source": "y",
+    "destination": "t",
+    "departure_time": "y",
+    "arrival_time": "6"
+  },
+  {
+    "id": 3,
+    "name": "garnieth",
+    "source": "r",
+    "destination": "gvb",
+    "departure_time": "11",
+    "arrival_time": "yy"
+  }
+]

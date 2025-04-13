@@ -4,27 +4,38 @@ from dotenv import load_dotenv
 import os
 import bcrypt
 import jwt
+import json
 from datetime import datetime, timedelta
-from flask_sqlalchemy import SQLAlchemy
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS
+CORS(app)
 
-# Mock Data
-buses = [
-    {"id": 1, "busNumber": "Bus 101", "route": "Downtown to Park", "departureTime": "08:00 AM", "arrivalTime": "09:00 AM"},
-    {"id": 2, "busNumber": "Bus 102", "route": "Airport to Central Station", "departureTime": "09:00 AM", "arrivalTime": "10:00 AM"},
-]
+# JSON storage file for buses
+BUSES_FILE = 'buses.json'
 
+# Load buses from JSON file
+def load_buses():
+    if not os.path.exists(BUSES_FILE):
+        with open(BUSES_FILE, 'w') as f:
+            json.dump([], f)
+        return []
+    with open(BUSES_FILE, 'r') as f:
+        return json.load(f)
+
+# Save buses to JSON file
+def save_buses(data):
+    with open(BUSES_FILE, 'w') as f:
+        json.dump(data, f, indent=2)
+
+# --- Other In-Memory Mock Data ---
 bookings = [
     {"id": 1, "userId": 1, "busId": 1, "date": "2023-10-15"},
     {"id": 2, "userId": 2, "busId": 2, "date": "2023-10-16"},
 ]
 
-# Hash passwords for mock users
 hashed_password_user = bcrypt.hashpw("password123".encode("utf-8"), bcrypt.gensalt())
 hashed_password_admin = bcrypt.hashpw("admin123".encode("utf-8"), bcrypt.gensalt())
 
@@ -33,7 +44,7 @@ users = [
     {"id": 2, "email": "admin@example.com", "password": hashed_password_admin, "role": "admin"},
 ]
 
-# Helper function to generate JWT token
+# --- Auth ---
 def generate_token(user_id, role):
     payload = {
         "user_id": user_id,
@@ -42,10 +53,55 @@ def generate_token(user_id, role):
     }
     return jwt.encode(payload, os.getenv("JWT_SECRET"), algorithm="HS256")
 
-# Routes
+# --- Logging ---
+@app.before_request
+def log_request_info():
+    print(f"➡️ {request.method} {request.path}")
+
+# --- Routes ---
 @app.route("/api/buses", methods=["GET"])
 def get_buses():
-    return jsonify(buses)
+    return jsonify(load_buses())
+
+@app.route("/api/buses", methods=["POST"])
+def add_bus():
+    data = request.get_json()
+    buses = load_buses()
+
+    new_bus = {
+        "id": len(buses) + 1,
+        "name": data.get("name"),
+        "source": data.get("source"),
+        "destination": data.get("destination"),
+        "departure_time": data.get("departure_time"),
+        "arrival_time": data.get("arrival_time"),
+    }
+
+    buses.append(new_bus)
+    save_buses(buses)
+
+    return jsonify({"message": "Bus added", "bus": new_bus}), 201
+
+@app.route("/api/buses/<int:bus_id>", methods=["GET"])
+def get_bus_by_id(bus_id):
+    buses = load_buses()
+    bus = next((b for b in buses if b["id"] == bus_id), None)
+
+    if not bus:
+        return jsonify({"error": "Bus not found"}), 404
+
+    return jsonify(bus)
+
+@app.route("/api/buses/<int:bus_id>", methods=["DELETE"])
+def delete_bus(bus_id):
+    buses = load_buses()
+    updated_buses = [b for b in buses if b["id"] != bus_id]
+
+    if len(updated_buses) == len(buses):
+        return jsonify({"error": "Bus not found"}), 404
+
+    save_buses(updated_buses)
+    return jsonify({"message": "Bus deleted successfully"})
 
 @app.route("/api/bookings", methods=["GET"])
 def get_bookings():
@@ -66,12 +122,9 @@ def login():
     if not user or not bcrypt.checkpw(password.encode("utf-8"), user["password"]):
         return jsonify({"error": "Invalid email or password"}), 401
 
-    # Generate JWT token
     token = generate_token(user["id"], user["role"])
-
-    # Return token and role
     return jsonify({"token": token, "role": user["role"]})
 
-# Run the app
+# --- Run App ---
 if __name__ == "__main__":
     app.run(debug=True)

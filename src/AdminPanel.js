@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import BusManagement from "./BusManagement";
 import BookingManagement from "./BookingManagement";
 import UserManagement from "./UserManagement";
-
+import AddBusForm from "./AddBusForm";
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("buses");
@@ -20,7 +20,12 @@ const AdminPanel = () => {
 
       {/* Content Area */}
       <div className="content">
-        {activeTab === "buses" && <BusManagement />}
+        {activeTab === "buses" && (
+          <>
+            <AddBusForm />
+            <BusManagement />
+          </>
+        )}
         {activeTab === "bookings" && <BookingManagement />}
         {activeTab === "users" && <UserManagement />}
       </div>

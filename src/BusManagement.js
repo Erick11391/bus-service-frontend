@@ -13,7 +13,7 @@ const BusManagement = () => {
 
   // Fetch buses from the backend
   useEffect(() => {
-    axios.get("/api/buses").then((response) => setBuses(response.data));
+    axios.get("http://127.0.0.1:5000/api/buses").then((response) => setBuses(response.data));
   }, []);
 
   // Handle form input changes
