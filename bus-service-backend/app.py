@@ -6,6 +6,11 @@ import bcrypt
 import jwt
 import json
 from datetime import datetime, timedelta
+<<<<<<< HEAD
+=======
+from flask_migrate import Migrate  # Import Migrate
+from models import db, Bus, Booking, User  # Import models and db from models.py
+>>>>>>> ad691887ea6006a8f70500980c2f2540909b47a9
 
 # Load environment variables
 load_dotenv()
@@ -13,6 +18,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+<<<<<<< HEAD
 # JSON storage file for buses
 BUSES_FILE = 'buses.json'
 
@@ -43,6 +49,17 @@ users = [
     {"id": 1, "email": "user@example.com", "password": hashed_password_user, "role": "user"},
     {"id": 2, "email": "admin@example.com", "password": hashed_password_admin, "role": "admin"},
 ]
+=======
+# Configure SQLite database
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///bus_service.db")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Disable unnecessary warnings
+
+# Initialize database
+db.init_app(app)
+
+# Initialize Migrate
+migrate = Migrate(app, db)  # Initialize Flask-Migrate
+>>>>>>> ad691887ea6006a8f70500980c2f2540909b47a9
 
 # --- Auth ---
 def generate_token(user_id, role):
@@ -61,6 +78,7 @@ def log_request_info():
 # --- Routes ---
 @app.route("/api/buses", methods=["GET"])
 def get_buses():
+<<<<<<< HEAD
     return jsonify(load_buses())
 
 @app.route("/api/buses", methods=["POST"])
@@ -102,14 +120,38 @@ def delete_bus(bus_id):
 
     save_buses(updated_buses)
     return jsonify({"message": "Bus deleted successfully"})
+=======
+    buses = Bus.query.all()
+    return jsonify([bus.to_dict() for bus in buses])
+>>>>>>> ad691887ea6006a8f70500980c2f2540909b47a9
 
 @app.route("/api/bookings", methods=["GET"])
 def get_bookings():
-    return jsonify(bookings)
+    bookings = Booking.query.all()
+    return jsonify([booking.to_dict() for booking in bookings])
+
+@app.route("/api/bookings", methods=["POST"])
+def create_booking():
+    data = request.get_json()
+    userId = data.get("userId")
+    busId = data.get("busId")
+    date = data.get("date")
+
+    # Validate input
+    if not userId or not busId or not date:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    # Create a new booking
+    new_booking = Booking(userId=userId, busId=busId, date=date)
+    db.session.add(new_booking)
+    db.session.commit()
+
+    return jsonify({"message": "Booking created successfully", "booking": new_booking.to_dict()}), 201
 
 @app.route("/api/users", methods=["GET"])
 def get_users():
-    return jsonify(users)
+    users = User.query.all()
+    return jsonify([user.to_dict() for user in users])
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -117,13 +159,21 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    user = next((u for u in users if u["email"] == email), None)
+    user = User.query.filter_by(email=email).first()
 
-    if not user or not bcrypt.checkpw(password.encode("utf-8"), user["password"]):
+    if not user or not bcrypt.checkpw(password.encode("utf-8"), user.password):
         return jsonify({"error": "Invalid email or password"}), 401
 
+<<<<<<< HEAD
     token = generate_token(user["id"], user["role"])
     return jsonify({"token": token, "role": user["role"]})
+=======
+    # Generate JWT token
+    token = generate_token(user.id, user.role)
+
+    # Return token and role
+    return jsonify({"token": token, "role": user.role})
+>>>>>>> ad691887ea6006a8f70500980c2f2540909b47a9
 
 # --- Run App ---
 if __name__ == "__main__":
