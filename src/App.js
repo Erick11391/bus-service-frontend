@@ -27,8 +27,6 @@ function App() {
   const [departure, setDeparture] = useState("");
   const [destination, setDestination] = useState("");
 
- 
- 
   useEffect(() => {
     const loadSchedules = async () => {
       try {
@@ -41,7 +39,7 @@ function App() {
         setLoading(false);
       }
     };
-  
+
     loadSchedules();
   }, []);
 
@@ -115,13 +113,7 @@ function App() {
                 <>
                   <HeroSection />
                   <HomeGallery />
-                  <SearchSection
-                    departure={departure}
-                    setDeparture={setDeparture}
-                    destination={destination}
-                    setDestination={setDestination}
-                    onSearch={handleSearch}
-                  />
+                  {/* Removed SearchSection from Home */}
                   {loading ? (
                     <div className="loading">Loading schedules...</div>
                   ) : (

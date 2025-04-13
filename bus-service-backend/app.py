@@ -4,154 +4,81 @@ from dotenv import load_dotenv
 import os
 import bcrypt
 import jwt
-import json
 from datetime import datetime, timedelta
-<<<<<<< HEAD
-=======
-from flask_migrate import Migrate  # Import Migrate
-from models import db, Bus, Booking, User  # Import models and db from models.py
->>>>>>> ad691887ea6006a8f70500980c2f2540909b47a9
+from flask_sqlalchemy import SQLAlchemy
 
-# Load environment variables
+# Load environment variables from .env
 load_dotenv()
 
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
-<<<<<<< HEAD
-# JSON storage file for buses
-BUSES_FILE = 'buses.json'
+# Configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY", "defaultsecret")
+app.config['JWT_SECRET_KEY'] = os.getenv("JWT_SECRET", "defaultjwtsecret")
 
-# Load buses from JSON file
-def load_buses():
-    if not os.path.exists(BUSES_FILE):
-        with open(BUSES_FILE, 'w') as f:
-            json.dump([], f)
-        return []
-    with open(BUSES_FILE, 'r') as f:
-        return json.load(f)
+# Initialize DB
+db = SQLAlchemy(app)
 
-# Save buses to JSON file
-def save_buses(data):
-    with open(BUSES_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
+# --- Models ---
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.LargeBinary(200), nullable=False)  # Store hashed password as bytes
+    role = db.Column(db.String(50), nullable=False)
 
-# --- Other In-Memory Mock Data ---
-bookings = [
-    {"id": 1, "userId": 1, "busId": 1, "date": "2023-10-15"},
-    {"id": 2, "userId": 2, "busId": 2, "date": "2023-10-16"},
-]
+    def __repr__(self):
+        return f"<User {self.email}>"
 
-hashed_password_user = bcrypt.hashpw("password123".encode("utf-8"), bcrypt.gensalt())
-hashed_password_admin = bcrypt.hashpw("admin123".encode("utf-8"), bcrypt.gensalt())
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    bus_id = db.Column(db.Integer, nullable=False)
+    date = db.Column(db.String(50), nullable=False)
 
-users = [
-    {"id": 1, "email": "user@example.com", "password": hashed_password_user, "role": "user"},
-    {"id": 2, "email": "admin@example.com", "password": hashed_password_admin, "role": "admin"},
-]
-=======
-# Configure SQLite database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL", "sqlite:///bus_service.db")
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Disable unnecessary warnings
+    def __repr__(self):
+        return f"<Booking {self.id}>"
 
-# Initialize database
-db.init_app(app)
-
-# Initialize Migrate
-migrate = Migrate(app, db)  # Initialize Flask-Migrate
->>>>>>> ad691887ea6006a8f70500980c2f2540909b47a9
-
-# --- Auth ---
+# --- Auth Helper ---
 def generate_token(user_id, role):
     payload = {
         "user_id": user_id,
         "role": role,
         "exp": datetime.utcnow() + timedelta(hours=1),
     }
-    return jwt.encode(payload, os.getenv("JWT_SECRET"), algorithm="HS256")
-
-# --- Logging ---
-@app.before_request
-def log_request_info():
-    print(f"➡️ {request.method} {request.path}")
+    token = jwt.encode(payload, app.config["JWT_SECRET_KEY"], algorithm="HS256")
+    if isinstance(token, bytes):
+        token = token.decode('utf-8')
+    return token
 
 # --- Routes ---
-@app.route("/api/buses", methods=["GET"])
-def get_buses():
-<<<<<<< HEAD
-    return jsonify(load_buses())
-
-@app.route("/api/buses", methods=["POST"])
-def add_bus():
+@app.route("/api/register", methods=["POST"])
+def register_user():
     data = request.get_json()
-    buses = load_buses()
+    email = data.get("email")
+    password = data.get("password")
+    role = data.get("role", "user")
 
-    new_bus = {
-        "id": len(buses) + 1,
-        "name": data.get("name"),
-        "source": data.get("source"),
-        "destination": data.get("destination"),
-        "departure_time": data.get("departure_time"),
-        "arrival_time": data.get("arrival_time"),
-    }
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
 
-    buses.append(new_bus)
-    save_buses(buses)
+    existing_user = User.query.filter_by(email=email).first()
+    if existing_user:
+        return jsonify({"error": "Email already exists"}), 400
 
-    return jsonify({"message": "Bus added", "bus": new_bus}), 201
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    new_user = User(email=email, password=hashed_password, role=role)
 
-@app.route("/api/buses/<int:bus_id>", methods=["GET"])
-def get_bus_by_id(bus_id):
-    buses = load_buses()
-    bus = next((b for b in buses if b["id"] == bus_id), None)
-
-    if not bus:
-        return jsonify({"error": "Bus not found"}), 404
-
-    return jsonify(bus)
-
-@app.route("/api/buses/<int:bus_id>", methods=["DELETE"])
-def delete_bus(bus_id):
-    buses = load_buses()
-    updated_buses = [b for b in buses if b["id"] != bus_id]
-
-    if len(updated_buses) == len(buses):
-        return jsonify({"error": "Bus not found"}), 404
-
-    save_buses(updated_buses)
-    return jsonify({"message": "Bus deleted successfully"})
-=======
-    buses = Bus.query.all()
-    return jsonify([bus.to_dict() for bus in buses])
->>>>>>> ad691887ea6006a8f70500980c2f2540909b47a9
-
-@app.route("/api/bookings", methods=["GET"])
-def get_bookings():
-    bookings = Booking.query.all()
-    return jsonify([booking.to_dict() for booking in bookings])
-
-@app.route("/api/bookings", methods=["POST"])
-def create_booking():
-    data = request.get_json()
-    userId = data.get("userId")
-    busId = data.get("busId")
-    date = data.get("date")
-
-    # Validate input
-    if not userId or not busId or not date:
-        return jsonify({"error": "Missing required fields"}), 400
-
-    # Create a new booking
-    new_booking = Booking(userId=userId, busId=busId, date=date)
-    db.session.add(new_booking)
-    db.session.commit()
-
-    return jsonify({"message": "Booking created successfully", "booking": new_booking.to_dict()}), 201
-
-@app.route("/api/users", methods=["GET"])
-def get_users():
-    users = User.query.all()
-    return jsonify([user.to_dict() for user in users])
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+        return jsonify({"message": "User registered successfully"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Registration failed", "details": str(e)}), 500
 
 @app.route("/api/login", methods=["POST"])
 def login():
@@ -159,22 +86,18 @@ def login():
     email = data.get("email")
     password = data.get("password")
 
-    user = User.query.filter_by(email=email).first()
+    if not email or not password:
+        return jsonify({"error": "Email and password are required"}), 400
 
+    user = User.query.filter_by(email=email).first()
     if not user or not bcrypt.checkpw(password.encode("utf-8"), user.password):
         return jsonify({"error": "Invalid email or password"}), 401
 
-<<<<<<< HEAD
-    token = generate_token(user["id"], user["role"])
-    return jsonify({"token": token, "role": user["role"]})
-=======
-    # Generate JWT token
     token = generate_token(user.id, user.role)
+    return jsonify({"token": token, "role": user.role}), 200
 
-    # Return token and role
-    return jsonify({"token": token, "role": user.role})
->>>>>>> ad691887ea6006a8f70500980c2f2540909b47a9
-
-# --- Run App ---
+# --- Run Server ---
 if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)

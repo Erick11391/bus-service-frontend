@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import './App.css'; // Reusing your existing styles
+import './Navbar.css'; // Import the updated Navbar.css
 
 const Navbar = () => {
   const location = useLocation();
@@ -83,15 +83,21 @@ const Navbar = () => {
             className="login-btn"
             onClick={() => {
               localStorage.removeItem("token"); // Clear token on logout
+              localStorage.removeItem("role"); // Also clear role
               window.location.href = "/"; // Redirect to home page
             }}
           >
             Logout
           </button>
         ) : (
-          <Link to="/login" className="login-btn">
-            Login
-          </Link>
+          <div className="auth-buttons">
+            <Link to="/login" className="login-btn">
+              Login
+            </Link>
+            <Link to="/signup" className="signup-btn">
+              Sign Up
+            </Link>
+          </div>
         )}
       </div>
     </nav>
