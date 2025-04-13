@@ -33,14 +33,13 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.email}>"
 
-class Booking(db.Model):
+class Bus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    bus_id = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.String(50), nullable=False)
+    bus_number = db.Column(db.String(50), nullable=False)
+    route = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
-        return f"<Booking {self.id}>"
+        return f"<Bus {self.bus_number}>"
 
 # --- Auth Helper ---
 def generate_token(user_id, role):
@@ -95,6 +94,12 @@ def login():
 
     token = generate_token(user.id, user.role)
     return jsonify({"token": token, "role": user.role}), 200
+
+@app.route("/api/buses", methods=["GET"])
+def get_buses():
+    buses = Bus.query.all()
+    bus_list = [{"id": bus.id, "bus_number": bus.bus_number, "route": bus.route} for bus in buses]
+    return jsonify(bus_list), 200
 
 # --- Run Server ---
 if __name__ == "__main__":

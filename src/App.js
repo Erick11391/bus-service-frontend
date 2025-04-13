@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
-import SearchSection from "./SearchSection";
+import SearchSection from "./SearchSection"; // Make sure SearchSection is imported
 import BusSchedules from "./BusSchedules";
 import BookingForm from "./BookingForm";
 import AboutPage from "./AboutPage";
@@ -32,7 +32,7 @@ function App() {
       try {
         const response = await axios.get("http://localhost:5000/api/buses");
         setSchedules(response.data);
-        setFilteredSchedules(response.data);
+        setFilteredSchedules(response.data); // Set the schedules
       } catch (error) {
         console.error("Failed to fetch bus data:", error);
       } finally {
@@ -128,17 +128,19 @@ function App() {
               path="/schedules"
               element={
                 <>
+                  {/* Pass filteredSchedules to SearchSection */}
                   <SearchSection
                     departure={departure}
                     setDeparture={setDeparture}
                     destination={destination}
                     setDestination={setDestination}
+                    schedules={filteredSchedules}
                     onSearch={handleSearch}
                   />
                   {loading ? (
                     <div className="loading">Loading schedules...</div>
                   ) : (
-                    <BusSchedules schedules={schedules} />
+                    <BusSchedules schedules={filteredSchedules} />
                   )}
                 </>
               }
