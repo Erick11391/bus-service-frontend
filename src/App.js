@@ -8,7 +8,6 @@ import {
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
 import SearchSection from "./SearchSection";
-import BusSchedules from "./BusSchedules";
 import BookingForm from "./BookingForm";
 import AboutPage from "./AboutPage";
 import ContactPage from "./ContactPage";
@@ -111,7 +110,7 @@ function App() {
                   {loading ? (
                     <div className="loading">Loading schedules...</div>
                   ) : (
-                    <BusSchedules schedules={filteredSchedules} />
+                    <div className="schedule-list"> {/* Schedule rendering logic */}</div>
                   )}
                 </>
               }
@@ -133,7 +132,7 @@ function App() {
                   {loading ? (
                     <div className="loading">Loading schedules...</div>
                   ) : (
-                    <BusSchedules schedules={filteredSchedules} />
+                    <div className="schedule-list"> {/* Schedule rendering logic */}</div>
                   )}
                 </>
               }
