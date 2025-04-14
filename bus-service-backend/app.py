@@ -35,6 +35,7 @@ class User(db.Model):
     password = db.Column(db.LargeBinary(200), nullable=False)
     role = db.Column(db.String(50), nullable=False)
     phone = db.Column(db.String(20), nullable=True)
+    is_blocked = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return f"<User {self.email}>"
@@ -80,6 +81,26 @@ def admin_required(f):
         except jwt.InvalidTokenError:
             return jsonify({"error": "Invalid token"}), 401
         return f(*args, **kwargs)
+    return decorated_function
+
+# --- Decorator: Only Active (Non-blocked) Users ---
+def user_must_be_active(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = request.headers.get("Authorization")
+        if not token:
+            return jsonify({"error": "Missing token"}), 401
+        try:
+            token = token.replace("Bearer ", "")
+            payload = jwt.decode(token, app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
+            user = User.query.get(payload["user_id"])
+            if not user or user.is_blocked:
+                return jsonify({"error": "Your account is blocked."}), 403
+            return f(*args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({"error": "Token expired"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"error": "Invalid token"}), 401
     return decorated_function
 
 # --- One-time Admin Seeder ---
@@ -136,9 +157,10 @@ def login():
     if not user or not bcrypt.checkpw(password.encode("utf-8"), user.password):
         return jsonify({"error": "Invalid email or password"}), 401
 
-    token = generate_token(user.id, user.role)
+    if user.is_blocked:
+        return jsonify({"error": "Your account is blocked. Please contact support."}), 403
 
-    # Derive name from email if needed (e.g., "john" from "john@example.com")
+    token = generate_token(user.id, user.role)
     name = email.split("@")[0].capitalize()
 
     return jsonify({
@@ -148,7 +170,6 @@ def login():
         "phoneNumber": user.phone,
         "name": name
     }), 200
-
 
 @app.route("/api/buses", methods=["GET"])
 def get_buses():
@@ -160,8 +181,8 @@ def get_buses():
 @admin_required
 def add_bus():
     data = request.get_json()
-    bus_number = data.get("name")  # frontend sends 'name'
-    route = data.get("source", "") + " → " + data.get("destination", "")  # combine for simplicity
+    bus_number = data.get("name")
+    route = data.get("source", "") + " → " + data.get("destination", "")
     source = data.get("source")
     destination = data.get("destination")
     departure_time = data.get("departure_time")
@@ -194,7 +215,19 @@ def delete_bus(bus_id):
     db.session.commit()
     return jsonify({"message": "Bus deleted successfully"}), 200
 
-# New Route to Delete User by Admin
+@app.route("/api/users", methods=["GET"])
+@admin_required
+def get_users():
+    users = User.query.all()
+    user_list = [{
+        "id": user.id,
+        "email": user.email,
+        "role": user.role,
+        "phone": user.phone,
+        "isBlocked": user.is_blocked if hasattr(user, 'is_blocked') else False
+    } for user in users]
+    return jsonify(user_list), 200
+
 @app.route("/api/users/<int:user_id>", methods=["DELETE"])
 @admin_required
 def delete_user(user_id):
@@ -204,42 +237,32 @@ def delete_user(user_id):
 
     db.session.delete(user)
     db.session.commit()
-
     return jsonify({"message": "User deleted successfully"}), 200
 
-# --- New Route to get User Info ---
-@app.route("/api/user_info", methods=["GET"])
-def get_user_info():
-    # Get the current logged-in user using the JWT token
-    token = request.headers.get("Authorization")
-    if not token:
-        return jsonify({"error": "Missing token"}), 401
-    
-    try:
-        # Remove the "Bearer " prefix from the token
-        token = token.replace("Bearer ", "")
-        # Decode the token
-        payload = jwt.decode(token, app.config["JWT_SECRET_KEY"], algorithms=["HS256"])
-        user_id = payload.get("user_id")  # Extract the user_id from the token
-        if not user_id:
-            return jsonify({"error": "Invalid token"}), 401
-    except jwt.ExpiredSignatureError:
-        return jsonify({"error": "Token expired"}), 401
-    except jwt.InvalidTokenError:
-        return jsonify({"error": "Invalid token"}), 401
+@app.route("/api/users/<int:user_id>", methods=["PUT"])
+@admin_required
+def update_user_status(user_id):
+    data = request.get_json()
+    is_blocked = data.get("isBlocked")
 
-    # Fetch user information from the database
+    if is_blocked is None:
+        return jsonify({"error": "Missing 'isBlocked' value"}), 400
+
     user = User.query.get(user_id)
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Return the user's name, email, and phone number
-    user_info = {
-        "name": user.email,  # For now, using email as the name if there is no 'name' field
-        "email": user.email,
-        "phone": user.phone
-    }
-    return jsonify(user_info), 200
+    user.is_blocked = is_blocked
+    db.session.commit()
+
+    return jsonify({"message": f"User {'blocked' if is_blocked else 'unblocked'} successfully"}), 200
+
+# --- Example protected booking route (to apply blocked check) ---
+@app.route("/api/book", methods=["POST"])
+@user_must_be_active
+def book_ticket():
+    # Example logic (replace with actual booking code)
+    return jsonify({"message": "Booking successful"}), 200
 
 # --- Run Server ---
 if __name__ == "__main__":
