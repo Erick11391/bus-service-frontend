@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
-import SearchSection from "./SearchSection"; // Make sure SearchSection is imported
+import SearchSection from "./SearchSection";
 import BusSchedules from "./BusSchedules";
 import BookingForm from "./BookingForm";
 import AboutPage from "./AboutPage";
@@ -16,7 +16,8 @@ import HomeGallery from "./HomeGallary";
 import Footer from "./Footer";
 import Login from "./Login";
 import AdminPanel from "./AdminPanel";
-import UserDashboard from "./UserDashboard";
+import SignUp from "./SignUp"; // ✅ Corrected import here
+import Dashboard from "./Dashboard"; // New Dashboard Component
 import "./App.css";
 import axios from "axios";
 
@@ -32,7 +33,7 @@ function App() {
       try {
         const response = await axios.get("http://localhost:5000/api/buses");
         setSchedules(response.data);
-        setFilteredSchedules(response.data); // Set the schedules
+        setFilteredSchedules(response.data);
       } catch (error) {
         console.error("Failed to fetch bus data:", error);
       } finally {
@@ -61,12 +62,15 @@ function App() {
     setFilteredSchedules(filtered);
   };
 
-  // Protect the admin route
   const ProtectedRoute = ({ children, requiredRole }) => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
-    if (!token || role !== requiredRole) {
+    const roleCheck = Array.isArray(requiredRole)
+      ? requiredRole.includes(role)
+      : role === requiredRole;
+
+    if (!token || !roleCheck) {
       return <Navigate to="/login" />;
     }
 
@@ -76,32 +80,23 @@ function App() {
   return (
     <Router>
       <div className="app">
-        {/* Navbar */}
         <Navbar />
 
-        {/* Main Content */}
         <main className="main-content">
           <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/booking" element={<BookingForm />} />
 
             {/* Protected Routes */}
             <Route
-              path="/admin"
+              path="/dashboard"
               element={
-                <ProtectedRoute requiredRole="admin">
-                  <AdminPanel />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/user-dashboard"
-              element={
-                <ProtectedRoute requiredRole="user">
-                  <UserDashboard />
+                <ProtectedRoute requiredRole={["admin", "user"]}>
+                  <Dashboard /> {/* Renders Admin or User dashboard based on role */}
                 </ProtectedRoute>
               }
             />
@@ -113,7 +108,6 @@ function App() {
                 <>
                   <HeroSection />
                   <HomeGallery />
-                  {/* Removed SearchSection from Home */}
                   {loading ? (
                     <div className="loading">Loading schedules...</div>
                   ) : (
@@ -128,7 +122,6 @@ function App() {
               path="/schedules"
               element={
                 <>
-                  {/* Pass filteredSchedules to SearchSection */}
                   <SearchSection
                     departure={departure}
                     setDeparture={setDeparture}
@@ -148,7 +141,6 @@ function App() {
           </Routes>
         </main>
 
-        {/* Footer */}
         <Footer />
       </div>
     </Router>

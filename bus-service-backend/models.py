@@ -6,19 +6,20 @@ from flask_migrate import Migrate
 db = SQLAlchemy()
 
 class User(db.Model):
-    __tablename__ = 'users'  # Explicit table name
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    role = db.Column(db.String(20), nullable=False)  # 'admin', 'driver', 'passenger'
+    role = db.Column(db.String(50), nullable=False)
+    phone = db.Column(db.String(20))  
+    name = db.Column(db.String(100), nullable=False)  # Added the name field
 
     def to_dict(self):
         return {
             "id": self.id,
             "email": self.email,
             "role": self.role,
+            "name": self.name,  # Include name in the dictionary
         }
-
 
 class Route(db.Model):
     __tablename__ = 'routes'  # Explicit table name
@@ -42,7 +43,6 @@ class Route(db.Model):
             "estimated_duration": self.estimated_duration,
         }
 
-
 class Bus(db.Model):
     __tablename__ = 'buses'  # Explicit table name
     id = db.Column(db.Integer, primary_key=True)
@@ -54,6 +54,9 @@ class Bus(db.Model):
     # Foreign key to Route (one-to-one relationship)
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id'), unique=True)
 
+    # Relationship to Route model to access source and destination
+    route = db.relationship('Route', backref='buses', uselist=False)
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -62,8 +65,9 @@ class Bus(db.Model):
             "model": self.model,
             "year": self.year,
             "route_id": self.route_id,
+            "route_origin": self.route.origin,  # Accessing source from Route model
+            "route_destination": self.route.destination  # Accessing destination from Route model
         }
-
 
 class Schedule(db.Model):
     __tablename__ = 'schedules'  # Explicit table name
@@ -83,7 +87,6 @@ class Schedule(db.Model):
             "arrival_time": self.arrival_time.strftime('%H:%M'),
             "day_of_week": self.day_of_week,
         }
-
 
 class Booking(db.Model):
     __tablename__ = 'bookings'  # Explicit table name

@@ -1,41 +1,47 @@
+// src/Login.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
 import "./Login.css";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
-      // 👇 Changed from localhost to 127.0.0.1
       const response = await axios.post("http://127.0.0.1:5000/api/login", {
         email,
         password,
       });
 
-      const { token, role } = response.data;
+      const { token, role, name, phoneNumber } = response.data;
 
-      // Store token and role
+      // Store the user data in localStorage
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
+      localStorage.setItem("user", JSON.stringify({ name, email, phoneNumber }));
 
-      // Navigate based on role
+      // Redirect based on the role
       if (role === "admin") {
         navigate("/admin");
       } else {
         navigate("/user-dashboard");
       }
     } catch (err) {
-      console.error(err);
-      setError("Invalid email or password");
+      console.error("Login failed:", err);
+      setError(
+        err.response?.data?.error || "Invalid email or password. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,7 +63,9 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
         {error && <p className="error">{error}</p>}
       </form>
     </div>

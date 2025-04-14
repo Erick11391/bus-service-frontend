@@ -1,12 +1,12 @@
-// src/SignUp.js
 import React, { useState } from 'react';
 import axios from 'axios';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: ''
+    name: '',      // Keeping the name field
+    email: '',     // Email field
+    password: '',  // Password field
+    phone: ''      // Phone field
   });
 
   const handleChange = (e) => {
@@ -16,7 +16,7 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/register', formData); // Change URL if different
+      const res = await axios.post('http://localhost:5000/api/register', formData);
       alert('User registered successfully!');
     } catch (err) {
       console.error(err);
@@ -27,9 +27,39 @@ const SignUp = () => {
   return (
     <form onSubmit={handleSubmit} className="signup-form">
       <h2>Sign Up</h2>
-      <input name="username" placeholder="Username" onChange={handleChange} required />
-      <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
-      <input name="password" type="password" placeholder="Password" onChange={handleChange} required />
+      <input
+        name="name"  // Keeping the name field for the user to input their name
+        placeholder="Name"
+        onChange={handleChange}
+        value={formData.name}
+        required
+      />
+      <input
+        name="email"
+        type="email"
+        placeholder="Email"
+        onChange={handleChange}
+        value={formData.email}
+        required
+      />
+      <input
+        name="phone"
+        type="tel"
+        placeholder="Phone Number"
+        onChange={handleChange}
+        value={formData.phone}
+        required
+        pattern="[0-9]{10,15}"
+        title="Enter a valid phone number"
+      />
+      <input
+        name="password"
+        type="password"
+        placeholder="Password"
+        onChange={handleChange}
+        value={formData.password}
+        required
+      />
       <button type="submit">Sign Up</button>
     </form>
   );

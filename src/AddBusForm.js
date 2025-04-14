@@ -18,7 +18,18 @@ function AddBusForm() {
   const handleSubmit = async e => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/buses', formData);
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in as admin to add a bus.");
+        return;
+      }
+
+      await axios.post('http://localhost:5000/api/buses', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
       alert('Bus added successfully!');
       setFormData({
         name: '',

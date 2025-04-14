@@ -21,8 +21,9 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location]);
 
-  // Check if the user is logged in
+  // Check if the user is logged in and get their role
   const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role"); // Get the role (admin or user)
 
   return (
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
@@ -51,24 +52,38 @@ const Navbar = () => {
           >
             Home
           </Link>
+
+          {/* Dashboard Link based on user role */}
+          {token && (
+            <Link 
+              to="/dashboard" 
+              className={`nav-link ${location.pathname === '/dashboard' ? 'active' : ''}`}
+            >
+              Dashboard
+            </Link>
+          )}
+
           <Link 
             to="/schedules" 
             className={`nav-link ${location.pathname === '/schedules' ? 'active' : ''}`}
           >
             Schedules
           </Link>
+
           <Link 
             to="/booking" 
             className={`nav-link ${location.pathname === '/booking' ? 'active' : ''}`}
           >
             Booking
           </Link>
+
           <Link 
             to="/about" 
             className={`nav-link ${location.pathname === '/about' ? 'active' : ''}`}
           >
             About
           </Link>
+
           <Link 
             to="/contact" 
             className={`nav-link ${location.pathname === '/contact' ? 'active' : ''}`}

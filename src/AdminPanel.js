@@ -1,3 +1,4 @@
+// AdminPanel.js
 import React, { useState } from "react";
 import BusManagement from "./BusManagement";
 import BookingManagement from "./BookingManagement";
@@ -6,6 +7,9 @@ import AddBusForm from "./AddBusForm";
 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("buses");
+
+  // Debugging the state of activeTab
+  console.log("Active Tab:", activeTab);
 
   return (
     <div className="admin-panel">
@@ -21,10 +25,10 @@ const AdminPanel = () => {
       {/* Content Area */}
       <div className="content">
         {activeTab === "buses" && (
-          <>
+          <div>
             <AddBusForm />
             <BusManagement />
-          </>
+          </div>
         )}
         {activeTab === "bookings" && <BookingManagement />}
         {activeTab === "users" && <UserManagement />}
