@@ -3,7 +3,7 @@ import BookingManagement from "./BookingManagement";
 import UserManagement from "./UserManagement";
 import AddBusForm from "./AddBusForm";
 import BusList1 from "./BusList1"; // Corrected import
-
+import "./AdminPanel.css"; 
 const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("buses");
 

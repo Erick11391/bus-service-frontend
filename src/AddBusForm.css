@@ -1,0 +1,55 @@
+/* AddBusForm.css */
+.add-bus-form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+  }
+  
+  .add-bus-form h2 {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .add-bus-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  .add-bus-form select,
+  .add-bus-form input[type="time"] {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  
+  .add-bus-form button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    border: none;
+    border-radius: 3px;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .add-bus-form button:hover {
+    background-color: #0056b3;
+  }
+  
+  .add-bus-form button:focus {
+    outline: none;
+  }
+  

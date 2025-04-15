@@ -55,12 +55,12 @@ const ContactPage = () => {
           <p>
             <strong>Headquarters:</strong>
             <br />
-            123 Transit Way, Cityville ST 12345
+            Nairobi, Kenya
           </p>
           <p>
             <strong>Customer Service:</strong>
             <br />
-            Phone: (555) 123-4567
+            Phone: (+254) 722323333
             <br />
             Email: support@reliablebuses.com
           </p>
@@ -126,7 +126,7 @@ const ContactPage = () => {
         {/* Embed your RouteMap component or Google Maps iframe here */}
         <iframe
           title="Company Location"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.952912458943!2d3.3752954141015625!3d6.524379395350147!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x103b8c1b0a4f0f85%3A0x7b0e9e7b8e0e7e8b!2s123%20Transit%20Way%2C%20Cityville%20ST%2012345!5e0!3m2!1sen!2sng!4v1698734598000"
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d50767.43411976429!2d36.78873679726563!3d-1.2920659999999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1172d84d4c89%3A0xf7cf02f12494a04b!2sNairobi%2C%20Kenya!5e0!3m2!1sen!2sng!4v1698736224000" 
           width="100%"
           height="450"
           style={{ border: 0 }}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
+import "./Sighnup.css";
 const SignUp = () => {
   const [formData, setFormData] = useState({
     name: '',      // Keeping the name field

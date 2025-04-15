@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import AdminPanel from './AdminPanel';
 import { useNavigate } from 'react-router-dom';
-
+import "./Dashboard.css";
 const Dashboard = () => {
   const [upcomingTrips, setUpcomingTrips] = useState([]);
   const role = localStorage.getItem("role");
