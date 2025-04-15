@@ -1,70 +1,73 @@
-# Getting Started with Create React App
+# Bus Service Application
+A React-based web application for managing and booking bus services. This frontend interfaces seamlessly with the Bus Service Backend, providing users with an intuitive platform to search for routes, book tickets, and manage their bookings.​
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Features
+. User-friendly interface for browsing available bus routes and schedules.
+
+. Secure user authentication and profile management.
+
+. Real-time seat availability and booking confirmations.
+
+. Responsive design optimized for both desktop and mobile devices.​
+
+## Prerequisites
+. Before you begin, ensure you have met the following requirements:
+
+. Node.js (v14 or later) and npm installed on your machine.
+
+. Access to the Bus Service Backend API.​
+
+## Getting Started
+1. Clone the Repository
+
+    git clone https://github.com/Erick11391/bus-service-frontend.git
+    cd bus-service-frontend
+2. Install Dependencies
+
+    npm install
+
+3. Configure Environment Variables
+      . Create a .env file in the root directory and add the following:​
+
+
+        REACT_APP_API_URL=http://localhost:5000/api
+    Replace http://localhost:5000/api with the actual URL of your backend API if it's different.​
+
+4. Run the Application
+
+        npm start
+
+   The application will launch in development mode at http://localhost:3000.​
 
 ## Available Scripts
-
 In the project directory, you can run:
 
-### `npm start`
+. npm start - Runs the app in development mode.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+. npm test - Launches the test runner in interactive watch mode.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+. npm run build - Builds the app for production to the build folder.​
 
-### `npm test`
+## Project Structure
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+        bus-service-frontend/
+        ├── bus-service-backend/ # Backend code integrated within the frontend repository
+        ├── public/              # Static files
+        ├── src/                 # Source code
+        │   ├── components/      # Reusable components
+        │   ├── pages/           # Page components
+        │   ├── services/        # API calls
+        │   ├── App.js           # Main application component
+        │   └── index.js         # Entry point
+        ├── .env                 # Environment variables
+        ├── package.json         # Project metadata and scripts
+        └── README.md            # Project documentation
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Contributing
+Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.​
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+For any questions or support, please open an issue in the repository.
