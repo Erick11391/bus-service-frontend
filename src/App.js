@@ -15,8 +15,8 @@ import HomeGallery from "./HomeGallary";
 import Footer from "./Footer";
 import Login from "./Login";
 import AdminPanel from "./AdminPanel";
-import SignUp from "./SignUp"; // ✅ Corrected import here
-import Dashboard from "./Dashboard"; // New Dashboard Component
+import SignUp from "./SignUp";
+import Dashboard from "./Dashboard";
 import "./App.css";
 import axios from "axios";
 
@@ -31,8 +31,12 @@ function App() {
     const loadSchedules = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/buses");
-        setSchedules(response.data);
-        setFilteredSchedules(response.data);
+        if (response.data && Array.isArray(response.data)) {
+          setSchedules(response.data);
+          setFilteredSchedules(response.data);
+        } else {
+          throw new Error("Invalid schedule data format");
+        }
       } catch (error) {
         console.error("Failed to fetch bus data:", error);
       } finally {
@@ -49,7 +53,7 @@ function App() {
       return;
     }
     const filtered = schedules.filter((schedule) => {
-      const routeParts = schedule.route.toLowerCase().split(" to ");
+      const routeParts = schedule.route.toLowerCase().split(" → ");
       const matchesDeparture = departure
         ? routeParts[0].includes(departure.toLowerCase())
         : true;
@@ -60,6 +64,10 @@ function App() {
     });
     setFilteredSchedules(filtered);
   };
+
+  useEffect(() => {
+    handleSearch();
+  }, [departure, destination]);
 
   const ProtectedRoute = ({ children, requiredRole }) => {
     const token = localStorage.getItem("token");
@@ -95,7 +103,17 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute requiredRole={["admin", "user"]}>
-                  <Dashboard /> {/* Renders Admin or User dashboard based on role */}
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Admin Panel */}
+            <Route
+              path="/admin-panel"
+              element={
+                <ProtectedRoute requiredRole="admin">
+                  <AdminPanel />
                 </ProtectedRoute>
               }
             />
@@ -110,7 +128,13 @@ function App() {
                   {loading ? (
                     <div className="loading">Loading schedules...</div>
                   ) : (
-                    <div className="schedule-list"> {/* Schedule rendering logic */}</div>
+                    <div className="schedule-list">
+                      {filteredSchedules.map((schedule) => (
+                        <div key={schedule.id} className="schedule-item">
+                          <p>{schedule.bus_number} - {schedule.route}</p>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </>
               }
@@ -132,7 +156,13 @@ function App() {
                   {loading ? (
                     <div className="loading">Loading schedules...</div>
                   ) : (
-                    <div className="schedule-list"> {/* Schedule rendering logic */}</div>
+                    <div className="schedule-list">
+                      {filteredSchedules.map((schedule) => (
+                        <div key={schedule.id} className="schedule-item">
+                          <p>{schedule.bus_number} - {schedule.route}</p>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </>
               }

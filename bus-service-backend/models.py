@@ -1,9 +1,27 @@
+# models.py
 from flask_sqlalchemy import SQLAlchemy
 from datetime import time, date
 from flask import Flask
 from flask_migrate import Migrate
+from datetime import time
 
 db = SQLAlchemy()
+
+TOWNS = [
+    "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Thika", "Nyeri",
+    "Meru", "Machakos", "Kisii", "Kericho", "Kakamega", "Bungoma", "Malindi", 
+    "Kitui", "Garissa", "Nyahururu", "Narok", "Voi", "Isiolo"
+]
+
+# Generate routes dynamically
+ROUTES = []
+for i in range(len(TOWNS)):
+    for j in range(len(TOWNS)):
+        if i != j:
+            ROUTES.append(f"{TOWNS[i]} to {TOWNS[j]}")
+
+DEPARTURES = list(set([route.split(" to ")[0] for route in ROUTES]))
+DESTINATIONS = list(set([route.split(" to ")[1] for route in ROUTES]))
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,6 +61,25 @@ class Route(db.Model):
             "estimated_duration": self.estimated_duration,
         }
 
+    @staticmethod
+    def seed_routes():
+        for i in range(len(TOWNS)):
+            for j in range(len(TOWNS)):
+                if i != j:
+                    route_name = f"{TOWNS[i]} to {TOWNS[j]}"
+                    route = Route(
+                        route_name=route_name,
+                        origin=TOWNS[i],
+                        destination=TOWNS[j],
+                        distance=None,  # Distance can be calculated later
+                        estimated_duration=None  # Duration can be calculated later
+                    )
+                    db.session.add(route)
+        db.session.commit()
+        print("Routes seeded.")
+
+from datetime import time  # Make sure this is imported
+
 class Bus(db.Model):
     __tablename__ = 'buses'  # Explicit table name
     id = db.Column(db.Integer, primary_key=True)
@@ -50,6 +87,10 @@ class Bus(db.Model):
     capacity = db.Column(db.Integer, nullable=False)
     model = db.Column(db.String(50))
     year = db.Column(db.Integer)
+
+    # New time fields
+    departure_time = db.Column(db.Time, nullable=False)
+    arrival_time = db.Column(db.Time, nullable=False)
 
     # Foreign key to Route (one-to-one relationship)
     route_id = db.Column(db.Integer, db.ForeignKey('routes.id'), unique=True)
@@ -66,7 +107,9 @@ class Bus(db.Model):
             "year": self.year,
             "route_id": self.route_id,
             "route_origin": self.route.origin,  # Accessing source from Route model
-            "route_destination": self.route.destination  # Accessing destination from Route model
+            "route_destination": self.route.destination,  # Accessing destination from Route model
+            "departure_time": self.departure_time.strftime("%H:%M") if self.departure_time else None,
+            "arrival_time": self.arrival_time.strftime("%H:%M") if self.arrival_time else None
         }
 
 class Schedule(db.Model):

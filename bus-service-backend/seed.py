@@ -1,3 +1,4 @@
+# seed.py
 from app import app, db  # Import app and db from your Flask application
 from models import User, Route, Bus, Schedule, Booking  # Import your models
 import bcrypt
@@ -20,32 +21,41 @@ with app.app_context():
     hashed_password_user = bcrypt.hashpw("password123".encode("utf-8"), bcrypt.gensalt())
     hashed_password_admin = bcrypt.hashpw("admin123".encode("utf-8"), bcrypt.gensalt())
 
-    user1 = User(email="passenger@example.com", password=hashed_password_user, role="passenger")
-    user2 = User(email="admin@example.com", password=hashed_password_admin, role="admin")
-    driver1 = User(email="driver@example.com", password=hashed_password_user, role="driver")
+    user1 = User(email="passenger@example.com", password=hashed_password_user, role="passenger", name="John Doe")
+    user2 = User(email="admin@example.com", password=hashed_password_admin, role="admin", name="Admin User")
+    driver1 = User(email="driver@example.com", password=hashed_password_user, role="driver", name="Driver One")
 
     db.session.add_all([user1, user2, driver1])
     db.session.commit()
 
     print("Users added.")
 
-    # Add routes
-    route1 = Route(
-        route_name="City Express",
-        origin="Downtown Terminal",
-        destination="Airport",
-        distance=50.5,
-        estimated_duration=60
-    )
-    route2 = Route(
-        route_name="Suburban Shuttle",
-        origin="Central Station",
-        destination="Park Lane",
-        distance=30.0,
-        estimated_duration=45
-    )
+    # Add routes dynamically based on the towns
+    print("Adding routes...")
 
-    db.session.add_all([route1, route2])
+    # Populate the routes based on towns
+    TOWNS = [
+        "Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret", "Thika", "Nyeri",
+        "Meru", "Machakos", "Kisii", "Kericho", "Kakamega", "Bungoma", "Malindi", 
+        "Kitui", "Garissa", "Nyahururu", "Narok", "Voi", "Isiolo"
+    ]
+
+    # Generate routes dynamically
+    routes = []
+    for i in range(len(TOWNS)):
+        for j in range(len(TOWNS)):
+            if i != j:
+                route_name = f"{TOWNS[i]} to {TOWNS[j]}"
+                route = Route(
+                    route_name=route_name,
+                    origin=TOWNS[i],
+                    destination=TOWNS[j],
+                    distance=None,  # Distance can be added later
+                    estimated_duration=None  # Duration can be added later
+                )
+                routes.append(route)
+
+    db.session.add_all(routes)
     db.session.commit()
 
     print("Routes added.")
@@ -56,14 +66,14 @@ with app.app_context():
         capacity=40,
         model="Volvo B7R",
         year=2020,
-        route_id=route1.id  # Assign to route1
+        route_id=1  # Assign to the first route (you can adjust this)
     )
     bus2 = Bus(
         bus_number="BUS-102",
         capacity=30,
         model="Mercedes-Benz Citaro",
         year=2019,
-        route_id=route2.id  # Assign to route2
+        route_id=2  # Assign to the second route (you can adjust this)
     )
 
     db.session.add_all([bus1, bus2])
@@ -71,7 +81,7 @@ with app.app_context():
 
     print("Buses added.")
 
-    # Add schedules
+    # Add schedules for the buses
     schedule1 = Schedule(
         bus_id=bus1.id,
         departure_time=time(8, 0),

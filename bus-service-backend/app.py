@@ -1,3 +1,4 @@
+# app.py
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -29,6 +30,8 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # --- Models ---
+
+# User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -40,17 +43,55 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.email}>"
 
+# Route model
+class Route(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    route_name = db.Column(db.String(100), nullable=False)
+    origin = db.Column(db.String(100), nullable=False)
+    destination = db.Column(db.String(100), nullable=False)
+    distance = db.Column(db.Float, nullable=True)  # Distance between origin and destination
+    estimated_duration = db.Column(db.Integer, nullable=True)  # Estimated duration in minutes
+
+    def __repr__(self):
+        return f"<Route {self.route_name}>"
+
+# Bus model
 class Bus(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     bus_number = db.Column(db.String(50), nullable=False)
-    route = db.Column(db.String(100), nullable=False)
-    source = db.Column(db.String(100), nullable=True)
-    destination = db.Column(db.String(100), nullable=True)
-    departure_time = db.Column(db.String(20), nullable=True)
-    arrival_time = db.Column(db.String(20), nullable=True)
+    capacity = db.Column(db.Integer, nullable=False)
+    model = db.Column(db.String(50), nullable=True)
+    year = db.Column(db.Integer, nullable=True)
+    route_id = db.Column(db.Integer, db.ForeignKey('route.id'), nullable=False)
+    route = db.relationship('Route', backref=db.backref('buses', lazy=True))
 
     def __repr__(self):
         return f"<Bus {self.bus_number}>"
+
+# Schedule model
+class Schedule(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    bus_id = db.Column(db.Integer, db.ForeignKey('bus.id'), nullable=False)
+    bus = db.relationship('Bus', backref=db.backref('schedules', lazy=True))
+    departure_time = db.Column(db.Time, nullable=False)
+    arrival_time = db.Column(db.Time, nullable=False)
+    day_of_week = db.Column(db.String(10), nullable=False)
+
+    def __repr__(self):
+        return f"<Schedule {self.bus.bus_number} {self.day_of_week}>"
+
+# Booking model
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('bookings', lazy=True))
+    schedule_id = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=False)
+    schedule = db.relationship('Schedule', backref=db.backref('bookings', lazy=True))
+    date = db.Column(db.Date, nullable=False)
+    seats_booked = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f"<Booking {self.user.email} {self.schedule.bus.bus_number}>"
 
 # --- Helper: Generate JWT Token ---
 def generate_token(user_id, role):
@@ -118,6 +159,7 @@ def create_admin_users():
     db.session.commit()
 
 # --- Routes ---
+
 @app.route("/api/register", methods=["POST"])
 def register_user():
     data = request.get_json()
@@ -181,28 +223,39 @@ def get_buses():
 @admin_required
 def add_bus():
     data = request.get_json()
-    bus_number = data.get("name")
-    route = data.get("source", "") + " → " + data.get("destination", "")
+    bus_number = data.get("bus")
     source = data.get("source")
     destination = data.get("destination")
     departure_time = data.get("departure_time")
     arrival_time = data.get("arrival_time")
 
-    if not bus_number or not route:
-        return jsonify({"error": "Bus number and route are required"}), 400
+    if not bus_number or not source or not destination:
+        return jsonify({"error": "Bus number, source, and destination are required"}), 400
 
+    # Create route_name based on source and destination
+    route_name = f"{source} → {destination}"
+
+    # Query to find the route based on source and destination
+    route = Route.query.filter_by(origin=source, destination=destination).first()
+
+    if not route:
+        return jsonify({"error": "Route not found"}), 400
+
+    # Create a new bus and associate the Route object
     new_bus = Bus(
         bus_number=bus_number,
-        route=route,
-        source=source,
-        destination=destination,
+        route=route,  # Assigning the Route object to the 'route' relationship
         departure_time=departure_time,
         arrival_time=arrival_time
     )
 
-    db.session.add(new_bus)
-    db.session.commit()
-    return jsonify({"message": "Bus added successfully"}), 201
+    try:
+        db.session.add(new_bus)
+        db.session.commit()
+        return jsonify({"message": "Bus added successfully"}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Failed to add bus", "details": str(e)}), 500
 
 @app.route("/api/buses/<int:bus_id>", methods=["DELETE"])
 @admin_required
@@ -261,7 +314,6 @@ def update_user_status(user_id):
 @app.route("/api/book", methods=["POST"])
 @user_must_be_active
 def book_ticket():
-    # Example logic (replace with actual booking code)
     return jsonify({"message": "Booking successful"}), 200
 
 # --- Run Server ---
@@ -270,3 +322,4 @@ if __name__ == "__main__":
         db.create_all()
         create_admin_users()
     app.run(debug=True)
+

@@ -208,7 +208,7 @@ body {
   background: radial-gradient(circle, rgba(67, 97, 238, 0.4) 0%, transparent 70%);
   border-radius: 50%;
   z-index: -1;
-  animation: float 8s ease-in-out infinite;
+  /* animation: float 8s ease-in-out infinite; */
 }
 
 .hero-content {
@@ -244,7 +244,7 @@ body {
   margin: 3rem auto;
   box-shadow: var(--shadow-lg);
   transform: translateY(50px);
-  animation: float 8s ease-in-out infinite;
+  /* animation: float 8s ease-in-out infinite;*/
   border: 1px solid rgba(255,255,255,0.2);
   position: relative;
   overflow: hidden;
@@ -519,7 +519,7 @@ body {
   }
 }
 
-@keyframes float {
+/* @keyframes float {
   0%, 100% { transform: translateY(0) rotate(-1deg); }
   50% { transform: translateY(-20px) rotate(1deg); }
 }
@@ -528,7 +528,7 @@ body {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
 }
-
+*/
 /* Responsive Design */
 @media (max-width: 1200px) {
   .hero h1 {
