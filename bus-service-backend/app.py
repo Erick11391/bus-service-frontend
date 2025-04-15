@@ -147,8 +147,8 @@ def user_must_be_active(f):
 # --- One-time Admin Seeder ---
 def create_admin_users():
     admins = [
-        {"email": "admin1@example.com", "password": "adminpass1"},
-        {"email": "admin2@example.com", "password": "adminpass2"},
+        {"email": "admin1@gmail.com", "password": "Equity2030"},
+        {"email": "admin2@gmail.com", "password": "Equity2030"},
     ]
     for admin in admins:
         existing = User.query.filter_by(email=admin["email"]).first()
